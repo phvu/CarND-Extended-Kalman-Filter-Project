@@ -25,6 +25,15 @@ public:
   */
   Eigen::MatrixXd CalculateJacobian(const Eigen::VectorXd& x_state);
 
+  /**
+   * Return the angle, normalized into the range [-PI, PI]
+   */
+  double normalizeAngle(double angle);
+
+  /**
+   * Convert cartesian coordinates into polar coordinates
+   */
+  Eigen::VectorXd cartesianToPolar(const Eigen::VectorXd &cartesian);
 };
 
 #endif /* TOOLS_H_ */

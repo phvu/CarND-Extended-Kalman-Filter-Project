@@ -53,7 +53,7 @@ MatrixXd Tools::CalculateJacobian(const VectorXd &x_state) {
   double c1 = px * px + py * py;
   if (fabs(c1) < 0.0001) {
     std::cout << "CalculateJacobian () - Error - Division by Zero" << std::endl;
-    c1 = 0.001;
+    c1 = 0.0001;
   }
 
   double c2 = sqrt(c1);
@@ -67,4 +67,44 @@ MatrixXd Tools::CalculateJacobian(const VectorXd &x_state) {
       py * (vx * py - vy * px) / c3, px * (px * vy - py * vx) / c3, px / c2, py / c2;
 
   return Hj;
+}
+
+double Tools::normalizeAngle(double angle) {
+  double v = angle;
+  while (v > M_PI) {
+    v -= 2 * M_PI;
+  }
+  while (v < -M_PI) {
+    v += 2 * M_PI;
+  }
+  return v;
+}
+
+VectorXd Tools::cartesianToPolar(const VectorXd &cartesian) {
+  double px = cartesian[0];
+  double py = cartesian[1];
+  double vx = cartesian[2];
+  double vy = cartesian[3];
+
+  double rho = sqrt(px * px + py * py);
+  double phi = 0;
+  double rho_dot = 0;
+
+  // avoid division by zero
+  if (fabs(px) < 0.001) {
+    std::cout << "Error while converting vector x_ to polar coordinates: Division by Zero" << std::endl;
+    px = 0.001;
+  }
+  phi = normalizeAngle(atan2(py, px));
+
+  // avoid division by zero
+  if (rho < 0.0001) {
+    std::cout << "Error while converting vector x_ to polar coordinates: Division by Zero" << std::endl;
+    rho = 0.001;
+  }
+  rho_dot = (px * vx + py * vy) / rho;
+
+  VectorXd polar(3);
+  polar << rho, phi, rho_dot;
+  return polar;
 }
