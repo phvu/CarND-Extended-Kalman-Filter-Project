@@ -51,14 +51,15 @@ MatrixXd Tools::CalculateJacobian(const VectorXd &x_state) {
 
   //pre-compute a set of terms to avoid repeated calculation
   double c1 = px * px + py * py;
+  if (fabs(c1) < 0.0001) {
+    std::cout << "CalculateJacobian () - Error - Division by Zero" << std::endl;
+    c1 = 0.001;
+  }
+
   double c2 = sqrt(c1);
   double c3 = (c1 * c2);
 
   //check division by zero
-  if (fabs(c1) < 0.0001) {
-    std::cout << "CalculateJacobian () - Error - Division by Zero" << std::endl;
-    return Hj;
-  }
 
   //compute the Jacobian matrix
   Hj << (px / c2), (py / c2), 0, 0,
