@@ -40,8 +40,7 @@ void KalmanFilter::Update_(const Eigen::VectorXd &y, Eigen::MatrixXd &H_in, Eige
   MatrixXd Ht = H_in.transpose();
   MatrixXd S = H_in * P_ * Ht + R_in;
   MatrixXd K = P_ * Ht * S.inverse();
-  MatrixXd I(x_.size(), x_.size());
-  I.setIdentity();
+  MatrixXd I = MatrixXd::Identity(x_.size(), x_.size());
 
   x_ = x_ + (K * y);
   P_ = (I - K * H_in) * P_;

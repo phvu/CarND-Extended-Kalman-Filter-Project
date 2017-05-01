@@ -3,6 +3,81 @@ Self-Driving Car Engineer Nanodegree Program
 
 ---
 
+## Project Rubic
+
+### Compiling
+
+Project can be compiled with:
+
+    $ mkdir -p build && cd build && cmake .. && make
+
+### Accuracy
+
+MSE on the provided dataset `obj_pose-laser-radar-synthetic-input.txt`:
+
+    $ ./ExtendedKF ../data/obj_pose-laser-radar-synthetic-input.txt ../data/obj_pose-laser-radar-synthetic-output.txt
+    RMSE
+    0.0980163
+    0.0851409
+     0.418298
+     0.481872
+     
+This satisfies the requirement RMSE <= [.11, .11, 0.52, 0.52] in the project rubic.
+
+### Follows the Correct Algorithm
+
+The algorithm is implemented in `FusionEKF.cpp` and `kalman_filter.cpp`:
+
+- The first measurement is used to initialize the mean state vector of the Kalman filter. If the first measurement 
+is from the lidar, initialization is trivial. If it is from the radar, I convert the polar coordinates in the measurement
+to the cartesian coordinates, and use it to initialize `px` and `py` components of the state vector. The velocity
+`vx`, `vy` is initialized as zeros for both case.
+
+    The state covariance matrix `P`, transition `F` and process covariance `Q` are all initialized as Identity. 
+     I tried different initialization for `P`, but identity matrix tends to give acceptable tracking results.
+     Big values on the diagonal of `P` tends to make the estimation varies quickly and might go wild.
+
+    The initialization is done between lines 47-76 of `FusionEKF.cpp`.
+
+- The `predict` step is done between lines 90-113 of `FusionEKF.cpp`. 
+
+    I first update `F` and `Q`, and then call `Predict()` on the Kalman filter, 
+    which in turn is implemented in 2 lines of code 22-23 of `kalman_filter.cpp`.
+    
+    Since we assume linear motion model, the predict step is the same for both lidar and radar data.
+    
+- The `update` step is done between lines 125-129 of `FusionEKF.cpp`.
+
+    If the measurement is from the radar, I first compute the Jacobian matrix, and use it as the `H` matrix
+    in the update equations. Otherwise I use the initialized `H_laser` matrix.
+    
+    The real update functions are implemented in lines 26-48 of `kalman_filter.cpp`. Depending on the type
+    of sensor, we compute the error vector `y` differently, and then call the same private function `Update_()`,
+    which works for any given error vector `y` and matrices `H` and `R`.
+    
+### Code Efficiency
+
+I did some refactoring to improve the readability of the project:
+
+- Removed `H` and `R` from the `KalmanFilter` class, add them as arguments in `Update()` and `UpdateEFK()`.
+ This is because `H` and `R` are different for lidar and radar, while they are only needed in the update phase.
+ 
+- Add some utility functions into `Tools` for converting cartesian coordinates into polar coordinates, and making
+sure angle measurements are between `[-PI, PI]`.
+
+### Running the visualization tool
+
+Here are the RMSE when running `2D Unity Visualizer` with different sensor inputs:
+
+| Sensor        | RMSE                     |
+|---------------|--------------------------|
+| Lidar + Radar | [0.16, 0.14, 0.45, 0.46] |
+| Lidar         | [0.15, 0.14, 0.48, 0.58] |
+| Radar         | [0.21, 0.35, 0.52, 0.82] |
+
+Radar alone is the least accurate, probably because radar is more noisy. Lidar is better, and the combination 
+of lidar + radar performs the best.
+
 ## Dependencies
 
 * cmake >= 3.5

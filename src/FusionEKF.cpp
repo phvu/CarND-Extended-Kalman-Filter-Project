@@ -67,7 +67,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
     // using P_in as identity matrix proves to be useful
 
-    ekf_.Init(x_in, F_in, P_in, Q_in);
+    ekf_.Init(x_in, P_in, F_in, Q_in);
 
     previous_timestamp_ = measurement_pack.timestamp_;
 

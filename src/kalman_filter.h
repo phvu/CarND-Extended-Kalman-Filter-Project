@@ -1,5 +1,6 @@
 #ifndef KALMAN_FILTER_H_
 #define KALMAN_FILTER_H_
+
 #include "Eigen/Dense"
 
 class KalmanFilter {
@@ -63,7 +64,7 @@ private:
 
   /**
    * Update the state, given the error vector
-   * Private method, will be used by Update and UpdateEFK
+   * Private method, will be used by Update and UpdateEKF
    */
   void Update_(const Eigen::VectorXd &y, Eigen::MatrixXd &H_in, Eigen::MatrixXd &R_in);
 };
